@@ -5,7 +5,7 @@ OPERATOR="sentvaloper1t4dqww9r5rdne79uxk8ytpcfkermsd0vvukue8"
 WALLET_NAME="sentinel"
 CHAIN_ID="sentinelhub-2"
 WALLET_PWD=""
-BIN_FILE="/root/go/bin/sentinelhub"
+BIN_FILE="$HOME/go/bin/sentinelhub"
 TOKEN="udvpn"
 
 
