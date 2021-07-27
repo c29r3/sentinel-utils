@@ -27,10 +27,11 @@ while true; do
     if (( $RESTAKE_AMOUNT >=  25000000 ));then
         echo "Let's delegate $RESTAKE_AMOUNT of REWARD tokens to $SELF_ADDR"
         # delegate balance
-        code=$(echo -e "$WALLET_PWD\n$WALLET_PWD\n" | $BIN_FILE tx staking delegate $OPERATOR "$RESTAKE_AMOUNT"$TOKEN -b sync --node $RPC --fees 2000$TOKEN --chain-id $CHAIN_ID --from $WALLET_NAME -y)
+        code=$(echo -e "$WALLET_PWD\n$WALLET_PWD\n" | $BIN_FILE tx staking delegate $OPERATOR "$RESTAKE_AMOUNT"$TOKEN -b sync --node ${RPC} --fees 2000$TOKEN --chain-id $CHAIN_ID --from $WALLET_NAME -y | jq .code)
+        echo $code
         if [[ $code == "32" ]]; then
-          seq=$($seq+1 | bc)
-          echo -e "$WALLET_PWD\n$WALLET_PWD\n" | $BIN_FILE tx staking delegate $OPERATOR "$RESTAKE_AMOUNT"$TOKEN -b sync --sequence $seq --node $RPC --fees 2000$TOKEN --chain-id $CHAIN_ID --from $WALLET_NAME -y
+          seq=$(echo $seq+1 | bc)
+          echo -e "$WALLET_PWD\n$WALLET_PWD\n" | $BIN_FILE tx staking delegate $OPERATOR "$RESTAKE_AMOUNT"$TOKEN -b sync -s $seq --node ${RPC} --fees 2000$TOKEN --chain-id $CHAIN_ID --from $WALLET_NAME -y
         fi
     else
         echo "Reward is $RESTAKE_AMOUNT"
