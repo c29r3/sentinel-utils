@@ -6,7 +6,7 @@ WALLET_NAME="sentinel"
 CHAIN_ID="sentinelhub-2"
 REST="http://135.181.60.250:1320"
 RPC="http://135.181.60.250:29657"
-WALLET_PWD=""
+read -sp 'Password: ' WALLET_PWD
 BIN_FILE="$HOME/go/bin/sentinelhub"
 TOKEN="udvpn"
 
