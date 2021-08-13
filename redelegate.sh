@@ -8,13 +8,19 @@ REST="http://135.181.60.250:1320"
 RPC="http://135.181.60.250:29657"
 read -sp 'Password: ' WALLET_PWD
 BIN_FILE="$HOME/go/bin/sentinelhub"
+FEE_AMOUNT=30000
 TOKEN="udvpn"
 
 
 while true; do
     # withdraw reward
     seq=$(curl -s ${REST}/auth/accounts/${SELF_ADDR} | jq -r .result.value.sequence)
-    echo -e "$WALLET_PWD\n$WALLET_PWD\n" | $BIN_FILE tx distribution withdraw-rewards $OPERATOR -b sync --commission --sequence $seq --node $RPC --fees 1000$TOKEN --chain-id $CHAIN_ID --from $WALLET_NAME -y
+    code=$(echo -e "$WALLET_PWD\n$WALLET_PWD\n" | $BIN_FILE tx distribution withdraw-rewards $OPERATOR -b sync --commission --sequence $seq --node $RPC --fees $FEE_AMOUNT$TOKEN --chain-id $CHAIN_ID --from $WALLET_NAME -y | jq .code)
+    
+    if [[ $code == "32" ]]; then
+      seq=$(echo $seq+1 | bc)
+      echo -e "$WALLET_PWD\n$WALLET_PWD\n" | $BIN_FILE tx distribution withdraw-rewards $OPERATOR -b sync --commission --sequence $seq --node $RPC --fees $FEE_AMOUNT$TOKEN --chain-id $CHAIN_ID -s $seq --from $WALLET_NAME -y
+    fi
     
     sleep 15
 
@@ -27,11 +33,11 @@ while true; do
     if (( $RESTAKE_AMOUNT >=  25000000 ));then
         echo "Let's delegate $RESTAKE_AMOUNT of REWARD tokens to $SELF_ADDR"
         # delegate balance
-        code=$(echo -e "$WALLET_PWD\n$WALLET_PWD\n" | $BIN_FILE tx staking delegate $OPERATOR "$RESTAKE_AMOUNT"$TOKEN -b sync --node ${RPC} --fees 2000$TOKEN --chain-id $CHAIN_ID --from $WALLET_NAME -y | jq .code)
+        code=$(echo -e "$WALLET_PWD\n$WALLET_PWD\n" | $BIN_FILE tx staking delegate $OPERATOR "$RESTAKE_AMOUNT"$TOKEN -b sync --node ${RPC} --fees $FEE_AMOUNT$TOKEN --chain-id $CHAIN_ID --from $WALLET_NAME -y | jq .code)
         echo $code
         if [[ $code == "32" ]]; then
           seq=$(echo $seq+1 | bc)
-          echo -e "$WALLET_PWD\n$WALLET_PWD\n" | $BIN_FILE tx staking delegate $OPERATOR "$RESTAKE_AMOUNT"$TOKEN -b sync -s $seq --node ${RPC} --fees 2000$TOKEN --chain-id $CHAIN_ID --from $WALLET_NAME -y
+          echo -e "$WALLET_PWD\n$WALLET_PWD\n" | $BIN_FILE tx staking delegate $OPERATOR "$RESTAKE_AMOUNT"$TOKEN -b sync -s $seq --node ${RPC} --fees $FEE_AMOUNT$TOKEN --chain-id $CHAIN_ID --from $WALLET_NAME -y
         fi
     else
         echo "Reward is $RESTAKE_AMOUNT"
